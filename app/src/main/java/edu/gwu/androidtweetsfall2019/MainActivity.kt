@@ -1,6 +1,8 @@
 package edu.gwu.androidtweetsfall2019
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -33,10 +35,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Tells Android which XML layout file to use for this Activity
         // The "R" is short for "Resources" (e.g. accessing a layout resource in this case)
         setContentView(R.layout.activity_main)
+
+        val preferences: SharedPreferences = getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
 
         // The "id" used here is what we had set in XML in the "id" field
         username = findViewById(R.id.username)
@@ -47,6 +50,8 @@ class MainActivity : AppCompatActivity() {
         // Kotlin shorthand for login.setEnabled(false)
         login.isEnabled = false
 
+        username.setText(preferences.getString("SAVED_USERNAME", ""))
+
         username.addTextChangedListener(textWatcher)
         password.addTextChangedListener(textWatcher)
 
@@ -54,7 +59,13 @@ class MainActivity : AppCompatActivity() {
         // The lambda is called when the user pressed the button
         // https://developer.android.com/reference/android/view/View.OnClickListener
         login.setOnClickListener {
-            //
+
+            // Save the inputted username to file
+            preferences
+                .edit()
+                .putString("SAVED_USERNAME", username.text.toString())
+                .apply()
+
             val intent = Intent(this, TweetsActivity::class.java)
             intent.putExtra("LOCATION", "Washington D.C.")
             startActivity(intent)
