@@ -7,3 +7,7 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# Uncomment the line below to have Git ignore the "google_maps_api.xml"
+# I'm checking mine in so that students can use my keys for the lecture app.
+#google_maps_api.xml
