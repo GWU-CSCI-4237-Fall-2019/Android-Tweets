@@ -1,0 +1,8 @@
+<resources>
+    <!--
+    Purposefully checking my API key into GitHub so students can follow along with lecture.
+
+    It is generally NOT a good idea to do this for a public repo, as others can use your key for their own projects.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyDiK2IxRPToikXYXrqe8nQqXJnHCxYzRhU</string>
+</resources>

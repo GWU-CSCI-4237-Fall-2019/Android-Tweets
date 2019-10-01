@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.SystemClock.sleep
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
@@ -59,14 +60,13 @@ class MainActivity : AppCompatActivity() {
         // The lambda is called when the user pressed the button
         // https://developer.android.com/reference/android/view/View.OnClickListener
         login.setOnClickListener {
-
             // Save the inputted username to file
             preferences
                 .edit()
                 .putString("SAVED_USERNAME", username.text.toString())
                 .apply()
 
-            val intent = Intent(this, TweetsActivity::class.java)
+            val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra("LOCATION", "Washington D.C.")
             startActivity(intent)
         }
