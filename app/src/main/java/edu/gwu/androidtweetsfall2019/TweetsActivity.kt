@@ -1,9 +1,12 @@
 package edu.gwu.androidtweetsfall2019
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.maps.model.LatLng
+import org.jetbrains.anko.doAsync
 
 class TweetsActivity : AppCompatActivity() {
 
@@ -13,23 +16,47 @@ class TweetsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tweets)
 
-        // getStringExtra retrieves the value associated with the key "LOCATION", casting it to a String
-        // If the key does not exist in the Intent, null will be returned, so you may also want to use
-        // hasExtra(...) to check if your key is in the intent (if it's possible for it to be missing)
-        val location: String = intent.getStringExtra("LOCATION")
+        // Retrieve data out of the intent, as supplied by the MapsActivity
+        val address: String = intent.getStringExtra("address")
+        val latitude: Double = intent.getDoubleExtra("latitude", 0.0)
+        val longitude: Double = intent.getDoubleExtra("longitude", 0.0)
 
         // Kotlin shorthand for setTitle(...)
         // Calling getString will retrieve a string from our strings.xml (based on the ID we pass)
         // the 2nd param instructs Android to substitute the location into the string where we specified %1$s
-        title = getString(R.string.tweets_title, location)
+        title = getString(R.string.tweets_title, address)
 
         recyclerView = findViewById(R.id.recyclerView)
 
         // Set the direction of our list to be vertical
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Create the adapter and assign it to the RecyclerView
-        recyclerView.adapter = TweetsAdapter(getFakeTweets())
+        // Networking must be done on a background thread
+        doAsync {
+            val twitterManager = TwitterManager()
+
+            // retrieveTweets can throw an Exception on connection / network errors
+            try {
+                val tweets = twitterManager.retrieveTweets(
+                    LatLng(latitude, longitude)
+                )
+
+                // The UI can only be updated from the UI Thread
+                runOnUiThread {
+                    // Create the adapter and assign it to the RecyclerView
+                    recyclerView.adapter = TweetsAdapter(tweets)
+                }
+            } catch(e: Exception) {
+                // The UI can only be updated from the UI Thread
+                runOnUiThread {
+                    Toast.makeText(
+                        this@TweetsActivity,
+                        "Error retrieving Tweets",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     fun getFakeTweets(): List<Tweet> {
