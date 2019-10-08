@@ -1,5 +1,6 @@
 package edu.gwu.androidtweetsfall2019
 
+import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +13,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import org.jetbrains.anko.doAsync
 
@@ -71,6 +71,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                         // Update button state
                         updateConfirmButton(firstAddress)
+
+                        // Setup / override the onClickListener to send the user to the
+                        // TweetsActivity with the new selected location data.
+                        confirm.setOnClickListener {
+                            val intent = Intent(this@MapsActivity, TweetsActivity::class.java)
+                            intent.putExtra("latitude", latLng.latitude)
+                            intent.putExtra("longitude", latLng.longitude)
+                            intent.putExtra("address", title)
+                            startActivity(intent)
+                        }
                     } else {
                         Log.e("MapsActivity", "No results found")
                     }
