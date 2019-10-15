@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class TweetsAdapter(val tweets: List<Tweet>) : RecyclerView.Adapter<TweetsAdapter.TweetsViewHolder>() {
 
@@ -37,7 +38,16 @@ class TweetsAdapter(val tweets: List<Tweet>) : RecyclerView.Adapter<TweetsAdapte
         holder.handle.text = currentTweet.handle
         holder.content.text = currentTweet.content
 
-        // TODO Download the image by its URL and load it into the ImageView -- future lecture
+        // Uncomment to turn on debug indicators
+        // Picasso
+        //     .get()
+        //     .setIndicatorsEnabled(true)
+
+        // Load the profile picture into our icon ImageView
+        Picasso
+            .get()
+            .load(currentTweet.iconUrl)
+            .into(holder.icon)
     }
 
     // A ViewHolder is a class which *holds* references to *views* that we care about in each

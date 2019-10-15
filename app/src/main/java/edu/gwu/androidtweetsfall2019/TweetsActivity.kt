@@ -35,10 +35,22 @@ class TweetsActivity : AppCompatActivity() {
         doAsync {
             val twitterManager = TwitterManager()
 
-            // retrieveTweets can throw an Exception on connection / network errors
+            // Our networking functions can throw an Exception on connection / network errors
             try {
+                // Read our API key / secret from XML
+                val apiKey = getString(R.string.api_key)
+                val apiSecret = getString(R.string.api_secret)
+
+                // Retrieve the OAuth token...
+                val oAuthToken = twitterManager.retrieveOAuthToken(
+                    apiKey = apiKey,
+                    apiSecret = apiSecret
+                )
+
+                // ...and use it to retrieve Tweets
                 val tweets = twitterManager.retrieveTweets(
-                    LatLng(latitude, longitude)
+                    oAuthToken = oAuthToken,
+                    latLng = LatLng(latitude, longitude)
                 )
 
                 // The UI can only be updated from the UI Thread
