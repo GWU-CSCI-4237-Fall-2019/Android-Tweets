@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Again, you should NOT check your API key / secret into GitHub. I'm deliberately
+    doing it for our lecture app. -->
+    <string name="api_key">LKpWIufRxmjNcY0IIByRUnTv4</string>
+    <string name="api_secret">5Pf8IuotGcHrizVgptMIYd8b6HyQLcompcy3YwT8ZALmOsjwA4</string>
+</resources>
