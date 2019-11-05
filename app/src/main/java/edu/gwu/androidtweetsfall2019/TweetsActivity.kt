@@ -1,16 +1,22 @@
 package edu.gwu.androidtweetsfall2019
 
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.jetbrains.anko.doAsync
 
 class TweetsActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
+
+    private lateinit var tweetContent: EditText
+
+    private lateinit var addTweet: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +33,8 @@ class TweetsActivity : AppCompatActivity() {
         title = getString(R.string.tweets_title, address)
 
         recyclerView = findViewById(R.id.recyclerView)
+        tweetContent = findViewById(R.id.tweet_content)
+        addTweet = findViewById(R.id.add_tweet)
 
         // Set the direction of our list to be vertical
         recyclerView.layoutManager = LinearLayoutManager(this)

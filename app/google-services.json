@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "396943487000",
+    "firebase_url": "https://android-tweets-fall-2019.firebaseio.com",
+    "project_id": "android-tweets-fall-2019",
+    "storage_bucket": "android-tweets-fall-2019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396943487000:android:e7c63b6011cff346a0536d",
+        "android_client_info": {
+          "package_name": "edu.gwu.androidtweetsfall2019"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "396943487000-oggq2umdncau2rsrnrd5q3lecdbcnq7b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlLNHwO2AugLdBSEdudkTNNa4tHaU2Fyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "396943487000-oggq2umdncau2rsrnrd5q3lecdbcnq7b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
