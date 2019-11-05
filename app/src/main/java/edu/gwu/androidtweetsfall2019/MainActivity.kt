@@ -5,12 +5,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.SystemClock.sleep
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,7 +34,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var login: Button
 
+    private lateinit var signUp: Button
+
     private lateinit var progressBar: ProgressBar
+
+    private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +46,15 @@ class MainActivity : AppCompatActivity() {
         // The "R" is short for "Resources" (e.g. accessing a layout resource in this case)
         setContentView(R.layout.activity_main)
 
+        firebaseAuth = FirebaseAuth.getInstance()
+
         val preferences: SharedPreferences = getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
 
         // The "id" used here is what we had set in XML in the "id" field
         username = findViewById(R.id.username)
         password = findViewById(R.id.password)
         login = findViewById(R.id.login)
+        signUp = findViewById(R.id.signUp)
         progressBar = findViewById(R.id.progressBar)
 
         // Kotlin shorthand for login.setEnabled(false)
@@ -60,15 +69,49 @@ class MainActivity : AppCompatActivity() {
         // The lambda is called when the user pressed the button
         // https://developer.android.com/reference/android/view/View.OnClickListener
         login.setOnClickListener {
-            // Save the inputted username to file
-            preferences
-                .edit()
-                .putString("SAVED_USERNAME", username.text.toString())
-                .apply()
+            val inputtedUsername: String = username.text.toString().trim()
+            val inputtedPassword: String = password.text.toString().trim()
 
-            val intent = Intent(this, MapsActivity::class.java)
-            intent.putExtra("LOCATION", "Washington D.C.")
-            startActivity(intent)
+            firebaseAuth
+                .signInWithEmailAndPassword(inputtedUsername, inputtedPassword)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val currentUser: FirebaseUser? = firebaseAuth.currentUser
+                        val email = currentUser?.email
+                        Toast.makeText(this, "Logged in as $email", Toast.LENGTH_SHORT).show()
+
+                        // Save the inputted username to file
+                        preferences
+                            .edit()
+                            .putString("SAVED_USERNAME", username.text.toString())
+                            .apply()
+
+                        val intent = Intent(this, MapsActivity::class.java)
+                        intent.putExtra("LOCATION", "Washington D.C.")
+                        startActivity(intent)
+                    } else {
+                        val exception = task.exception
+                        Toast.makeText(this, "Registration failed: $exception", Toast.LENGTH_SHORT).show()
+
+                    }
+                }
+        }
+
+        signUp.setOnClickListener {
+            val inputtedUsername: String = username.text.toString().trim()
+            val inputtedPassword: String = password.text.toString().trim()
+            firebaseAuth
+                .createUserWithEmailAndPassword(inputtedUsername, inputtedPassword)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val currentUser: FirebaseUser? = firebaseAuth.currentUser
+                        val email = currentUser?.email
+                        Toast.makeText(this, "Registered as $email", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val exception = task.exception
+                        Toast.makeText(this, "Registration failed: $exception", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
     }
 
