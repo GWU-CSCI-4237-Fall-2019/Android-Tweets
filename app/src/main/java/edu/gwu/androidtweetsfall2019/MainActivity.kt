@@ -11,7 +11,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var firebaseAuth: FirebaseAuth
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Tells Android which XML layout file to use for this Activity
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         val preferences: SharedPreferences = getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
 
@@ -69,6 +74,8 @@ class MainActivity : AppCompatActivity() {
         // The lambda is called when the user pressed the button
         // https://developer.android.com/reference/android/view/View.OnClickListener
         login.setOnClickListener {
+            firebaseAnalytics.logEvent("login_clicked", null)
+
             val inputtedUsername: String = username.text.toString().trim()
             val inputtedPassword: String = password.text.toString().trim()
 
@@ -76,6 +83,9 @@ class MainActivity : AppCompatActivity() {
                 .signInWithEmailAndPassword(inputtedUsername, inputtedPassword)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+
+                        firebaseAnalytics.logEvent("login_success", null)
+
                         val currentUser: FirebaseUser? = firebaseAuth.currentUser
                         val email = currentUser?.email
                         Toast.makeText(this, "Logged in as $email", Toast.LENGTH_SHORT).show()
@@ -91,6 +101,14 @@ class MainActivity : AppCompatActivity() {
                         startActivity(intent)
                     } else {
                         val exception = task.exception
+
+                        // Example of logging some extra metadata (the error reason) with our analytic
+                        val reason = if (exception is FirebaseAuthInvalidCredentialsException) "invalid_credentials" else "connection_failure"
+                        val bundle = Bundle()
+                        bundle.putString("error_type", reason)
+
+                        firebaseAnalytics.logEvent("login_failed", bundle)
+
                         Toast.makeText(this, "Registration failed: $exception", Toast.LENGTH_SHORT).show()
 
                     }
@@ -98,16 +116,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         signUp.setOnClickListener {
+            firebaseAnalytics.logEvent("signup_clicked", null)
+
             val inputtedUsername: String = username.text.toString().trim()
             val inputtedPassword: String = password.text.toString().trim()
             firebaseAuth
                 .createUserWithEmailAndPassword(inputtedUsername, inputtedPassword)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        firebaseAnalytics.logEvent("signup_success", null)
                         val currentUser: FirebaseUser? = firebaseAuth.currentUser
                         val email = currentUser?.email
                         Toast.makeText(this, "Registered as $email", Toast.LENGTH_SHORT).show()
                     } else {
+                        firebaseAnalytics.logEvent("signup_failed", null)
                         val exception = task.exception
                         Toast.makeText(this, "Registration failed: $exception", Toast.LENGTH_SHORT).show()
                     }
@@ -130,6 +152,7 @@ class MainActivity : AppCompatActivity() {
 
             // Kotlin shorthand for login.setEnabled(enabled)
             login.isEnabled = enabled
+            signUp.isEnabled = enabled
         }
     }
 }
