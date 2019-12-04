@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -44,11 +45,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
+    private lateinit var shakeManager: ShakeManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Tells Android which XML layout file to use for this Activity
         // The "R" is short for "Resources" (e.g. accessing a layout resource in this case)
         setContentView(R.layout.activity_main)
+
+        shakeManager = ShakeManager(this)
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
@@ -135,6 +140,20 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        shakeManager.detectShakes {
+            Log.d("ShakeManager", "Shake detected!")
+            // Then we could either call `signInWithEmailAndPassword` with
+            // a guest account or start the next Activity
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        shakeManager.stopDetectingShakes()
     }
 
     // A TextWatcher is an interface with three functions, so we cannot use lambda-shorthand
