@@ -1,6 +1,7 @@
 package edu.gwu.androidtweetsfall2019
 
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,8 @@ import com.google.firebase.database.ValueEventListener
 import org.jetbrains.anko.doAsync
 
 class TweetsActivity : AppCompatActivity() {
+
+    private val currentTweets: MutableList<Tweet> = mutableListOf()
 
     private lateinit var recyclerView: RecyclerView
 
@@ -53,6 +56,69 @@ class TweetsActivity : AppCompatActivity() {
         // Set the direction of our list to be vertical
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        if (savedInstanceState != null) {
+            val savedTweets = savedInstanceState.getSerializable("TWEETS") as ArrayList<Tweet>
+            currentTweets.addAll(savedTweets)
+
+            recyclerView.adapter = TweetsAdapter(currentTweets)
+        } else {
+            getTweetsFromTwitter(latitude, longitude)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("TWEETS", ArrayList(currentTweets))
+    }
+
+    fun getTweetsFromTwitter(latitude: Double, longitude: Double) {
+        addTweet.hide()
+        tweetContent.visibility = View.GONE
+
+        // Networking must be done on a background thread
+        doAsync {
+            val twitterManager = TwitterManager()
+
+            // Our networking functions can throw an Exception on connection / network errors
+            try {
+                // Read our API key / secret from XML
+                val apiKey = getString(R.string.api_key)
+                val apiSecret = getString(R.string.api_secret)
+
+                // Retrieve the OAuth token...
+                val oAuthToken = twitterManager.retrieveOAuthToken(
+                    apiKey = apiKey,
+                    apiSecret = apiSecret
+                )
+
+                // ...and use it to retrieve Tweets
+                val tweets = twitterManager.retrieveTweets(
+                    oAuthToken = oAuthToken,
+                    latLng = LatLng(latitude, longitude)
+                )
+
+                currentTweets.clear()
+                currentTweets.addAll(tweets)
+
+                // The UI can only be updated from the UI Thread
+                runOnUiThread {
+                    // Create the adapter and assign it to the RecyclerView
+                    recyclerView.adapter = TweetsAdapter(tweets)
+                }
+            } catch(e: Exception) {
+                // The UI can only be updated from the UI Thread
+                runOnUiThread {
+                    Toast.makeText(
+                        this@TweetsActivity,
+                        "Error retrieving Tweets",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    fun getTweetsFromFirebase(state: String) {
         val reference = firebaseDatabase.getReference("tweets/$state")
 
         addTweet.setOnClickListener {
@@ -100,46 +166,6 @@ class TweetsActivity : AppCompatActivity() {
                 recyclerView.adapter = TweetsAdapter(tweets)
             }
         })
-
-
-        // Networking must be done on a background thread
-//        doAsync {
-//            val twitterManager = TwitterManager()
-//
-//            // Our networking functions can throw an Exception on connection / network errors
-//            try {
-//                // Read our API key / secret from XML
-//                val apiKey = getString(R.string.api_key)
-//                val apiSecret = getString(R.string.api_secret)
-//
-//                // Retrieve the OAuth token...
-//                val oAuthToken = twitterManager.retrieveOAuthToken(
-//                    apiKey = apiKey,
-//                    apiSecret = apiSecret
-//                )
-//
-//                // ...and use it to retrieve Tweets
-//                val tweets = twitterManager.retrieveTweets(
-//                    oAuthToken = oAuthToken,
-//                    latLng = LatLng(latitude, longitude)
-//                )
-//
-//                // The UI can only be updated from the UI Thread
-//                runOnUiThread {
-//                    // Create the adapter and assign it to the RecyclerView
-//                    recyclerView.adapter = TweetsAdapter(tweets)
-//                }
-//            } catch(e: Exception) {
-//                // The UI can only be updated from the UI Thread
-//                runOnUiThread {
-//                    Toast.makeText(
-//                        this@TweetsActivity,
-//                        "Error retrieving Tweets",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        }
     }
 
     fun getFakeTweets(): List<Tweet> {

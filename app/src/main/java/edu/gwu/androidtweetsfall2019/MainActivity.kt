@@ -1,20 +1,29 @@
 package edu.gwu.androidtweetsfall2019
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseUser
+import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +58,8 @@ class MainActivity : AppCompatActivity() {
         // Tells Android which XML layout file to use for this Activity
         // The "R" is short for "Resources" (e.g. accessing a layout resource in this case)
         setContentView(R.layout.activity_main)
+
+        createNotificationChannel()
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
@@ -128,6 +139,8 @@ class MainActivity : AppCompatActivity() {
                         val currentUser: FirebaseUser? = firebaseAuth.currentUser
                         val email = currentUser?.email
                         Toast.makeText(this, "Registered as $email", Toast.LENGTH_SHORT).show()
+
+                        showNotification()
                     } else {
                         firebaseAnalytics.logEvent("signup_failed", null)
                         val exception = task.exception
@@ -136,6 +149,50 @@ class MainActivity : AppCompatActivity() {
                 }
         }
     }
+
+    private fun showNotification() {
+        val tweetsIntent = Intent(this, TweetsActivity::class.java)
+        tweetsIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+        tweetsIntent.putExtra("address", "2121 I St NW")
+        tweetsIntent.putExtra("state", "Virginia")
+        tweetsIntent.putExtra("latitude", 38.8997145)
+        tweetsIntent.putExtra("longitude", -77.0485992)
+
+        // val pendingIntent = PendingIntent.getActivity(this, 0, tweetsIntent, 0)
+        val pendingIntentBuilder = TaskStackBuilder.create(this)
+        pendingIntentBuilder.addNextIntentWithParentStack(tweetsIntent)
+
+        val pendingIntent = pendingIntentBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val builder = NotificationCompat.Builder(this, "default")
+            .setSmallIcon(R.drawable.ic_check_white)
+            .setContentTitle("Android Tweets")
+            .setContentText("Welcome to Android Tweets!")
+            .addAction(0, "Go To Virginia", pendingIntent)
+
+        NotificationManagerCompat.from(this).notify(0, builder.build())
+    }
+
+    private fun createNotificationChannel() {
+        // Only needed for Android Oreo and higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Default Notifications"
+            val descriptionText = "The app's default notification set"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+            val channel = NotificationChannel("default", name, importance)
+            channel.description = descriptionText
+
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
 
     // A TextWatcher is an interface with three functions, so we cannot use lambda-shorthand
     // The functions are called accordingly as the user types in the EditText
