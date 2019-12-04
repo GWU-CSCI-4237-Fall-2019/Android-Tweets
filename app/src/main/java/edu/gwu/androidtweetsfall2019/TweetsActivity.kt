@@ -32,11 +32,13 @@ class TweetsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tweets)
 
+        val yelpKey = ApiConstants.yelpApiKey
+
         firebaseDatabase = FirebaseDatabase.getInstance()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         // Retrieve data out of the intent, as supplied by the MapsActivity
-        val address: String = intent.getStringExtra("address")
+        val address: String = intent.getStringExtra(MapsActivity.INTENT_KEY_ADDRESS)
         val state: String = intent.getStringExtra("state")
         val latitude: Double = intent.getDoubleExtra("latitude", 0.0)
         val longitude: Double = intent.getDoubleExtra("longitude", 0.0)

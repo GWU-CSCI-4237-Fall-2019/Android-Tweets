@@ -27,7 +27,12 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import org.jetbrains.anko.doAsync
 
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    companion object {
+        val INTENT_KEY_ADDRESS = "address"
+    }
 
     private lateinit var mMap: GoogleMap
 
@@ -199,7 +204,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     // TweetsActivity with the new selected location data.
                     confirm.setOnClickListener {
                         val intent = Intent(this@MapsActivity, TweetsActivity::class.java)
-                        intent.putExtra("state", state)
+                        intent.putExtra(INTENT_KEY_ADDRESS, state)
                         intent.putExtra("latitude", latLng.latitude)
                         intent.putExtra("longitude", latLng.longitude)
                         intent.putExtra("address", title)
